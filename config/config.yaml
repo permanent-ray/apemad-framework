@@ -1,0 +1,99 @@
+# config/config.yaml
+# APEMAD 框架配置文件（所有超参数集中管理）
+
+# ========================
+# LLM 设置
+# ========================
+llm:
+  provider: "huggingface"
+  model_name: "D:/apemad-framework/local_models/Qwen2.5-3B-Instruct"
+  temperature: 0.7
+  max_tokens: 512
+  top_p: 0.9
+
+# ========================
+# 任务复杂度评估参数
+# ========================
+complexity:
+  weights:
+    length: 0.25        # α - 输入长度权重
+    depth: 0.35         # β - 实体依赖深度
+    uncertainty: 0.30   # γ - 初步不确定性
+    modality: 0.10      # δ - 多模态复杂度
+  thresholds:
+    low: 0.35
+    medium: 0.65
+    high: 1.0
+  max_agents_low: 4
+  max_agents_medium: 7
+  max_agents_high: 12
+
+# ========================
+# 不确定性计算设置
+# ========================
+uncertainty:
+  entropy_threshold_high: 0.35     # entropy < 此值 → 高确定
+  entropy_threshold_low: 0.65      # entropy > 此值 → 低确定
+  sampling_n: 3                    # 多采样次数（variance 计算）
+  semantic_threshold: 0.75         # 语义一致性阈值（cosine sim）
+
+# ========================
+# 自适应提示融合设置
+# ========================
+fusion:
+  max_depth_low: 1
+  max_depth_medium: 2
+  max_depth_high: 3
+  min_confidence_weight: 0.6       # 低于此权重不注入
+
+# ========================
+# 外部验证层设置
+# ========================
+validation:
+  rag:
+    embedding_model: "all-MiniLM-L6-v2"
+    top_k_low: 3
+    top_k_high: 5
+    similarity_threshold_strong: 0.75
+    similarity_threshold_weak: 0.5
+  verifier_llm_temperature: 0.2    # Verifier 判断时低温度，更确定
+
+# ========================
+# 监控与终止设置
+# ========================
+termination:
+  global_uncertainty_threshold_factor: 0.3   # < θ * C 终止（θ=0.3）
+  change_threshold: 0.05                     # 连续两轮变化 < 此值
+  max_rounds_low: 3
+  max_rounds_medium: 5
+  max_rounds_high: 8
+
+# ========================
+# RL 微调设置
+# ========================
+rl:
+  enabled: false                     # 先关闭，实验稳定后再开
+  ppo_epochs: 10
+  reward_weights:
+    accuracy: 1.0
+    consistency: 0.8
+    cost: -0.3
+    hallucination: -0.5
+  update_frequency: 10               # 每 10 个任务优化一次
+
+# ========================
+# 路径设置（相对项目根目录）
+# ========================
+paths:
+  logs_dir: "../logs"
+  results_dir: "../experiments/results"
+  rag_index_dir: "../experiments/rag_index"   # FAISS 索引存放处
+  paper_figures_dir: "../paper_figures"
+
+# ========================
+# 调试与日志
+# ========================
+debug:
+  verbose: true
+  log_level: "INFO"                  # DEBUG / INFO / WARNING
+  save_prompt_chain: true            # 是否保存每轮 prompt 链可视化
